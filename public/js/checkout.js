@@ -1,32 +1,14 @@
 // public/js/checkout.js
 
-const PREORDER_DAYS = 7;
-const MAX_STOCK_PER_DAY = 20;
-
 let currentProduct = null;
-
-// Alert helper (INLINE di halaman, pakai #alert-box)
-function showAlert(type, message) {
-    const alertBox = document.getElementById('alert-box');
-    if (!alertBox) return;
-
-    const base = 'border px-4 py-3 rounded text-sm ';
-    let style = '';
-
-    if (type === 'success') {
-        style = 'bg-green-50 border-green-400 text-green-800';
-    } else if (type === 'warning') {
-        style = 'bg-yellow-50 border-yellow-400 text-yellow-800';
-    } else {
-        style = 'bg-red-50 border-red-400 text-red-800';
-    }
-
-    alertBox.className = 'alert-box mb-4 ' + base + style;
-    alertBox.innerHTML = message;
-}
 
 // Alert khusus VALIDASI (SweetAlert)
 function showValidationError(productName) {
+    if (typeof Swal === 'undefined') {
+        alert('Lengkapi data checkout terlebih dahulu.'); // fallback kalau SweetAlert belum load
+        return;
+    }
+
     Swal.fire({
         icon: 'error',
         title: 'Wah Maaf',
@@ -55,7 +37,7 @@ function getVariantQuantities() {
     });
 }
 
-// Tombol +/-
+// Tombol +/- varian
 function changeVariantQty(index, delta) {
     const input = document.getElementById(`variant-qty-${index}`);
     if (!input) return;
@@ -71,7 +53,7 @@ function changeVariantQty(index, delta) {
     updateOrderSummary();
 }
 
-// Input manual
+// Input manual varian
 function onVariantQtyInput(index) {
     const input = document.getElementById(`variant-qty-${index}`);
     if (!input) return;
@@ -84,16 +66,11 @@ function onVariantQtyInput(index) {
     updateOrderSummary();
 }
 
-// stok simulasi (kalau mau pakai nanti)
-function getStockForDate(date, packageIndex) {
-    return MAX_STOCK_PER_DAY;
-}
-
 // === RINGKASAN PESANAN ===
 function updateOrderSummary() {
     if (!currentProduct) return;
 
-    const deliveryDate = document.getElementById('delivery-date').value;
+    const deliveryDate = document.getElementById('delivery-date')?.value;
     const quantities   = getVariantQuantities();
 
     const summaryDiv   = document.getElementById('order-summary');
@@ -101,9 +78,12 @@ function updateOrderSummary() {
     const subtotalEl   = document.getElementById('subtotal-price');
     const totalEl      = document.getElementById('total-price');
 
+    if (!summaryDiv || !totalSection || !subtotalEl || !totalEl) return;
+
+    // Kalau belum pilih tanggal atau belum ada qty
     if (!deliveryDate || !quantities.some(q => q > 0)) {
         summaryDiv.innerHTML =
-            '<p class="text-gray-600 text-sm">Pilih tanggal dan isi jumlah minimal 1 pada salah satu paket.</p>';
+            '<p class="text-gray-500 text-sm">Pilih tanggal dan isi jumlah minimal 1 pada salah satu paket.</p>';
         totalSection.classList.add('hidden');
         return;
     }
@@ -118,7 +98,7 @@ function updateOrderSummary() {
         total += sub;
 
         itemsHtml += `
-            <div class="flex justify-between text-sm mb-1">
+            <div class="flex justify-between text-sm mb-2">
                 <div>
                     <div class="font-medium text-gray-900">${pkg.label}</div>
                     <div class="text-xs text-gray-600">${qty} pack x ${formatRupiah(pkg.price)}</div>
@@ -130,12 +110,16 @@ function updateOrderSummary() {
         `;
     });
 
+    const deliveryText = deliveryDate
+        ? `<div class="text-xs text-gray-500 mt-1">Tanggal pengiriman: <span class="font-medium text-gray-800">${deliveryDate}</span></div>`
+        : '';
+
     summaryDiv.innerHTML = `
         <div class="mb-3">
             <div class="font-semibold text-gray-900">${currentProduct.name}</div>
-            <div class="text-xs text-gray-500">Tanggal pengiriman: ${deliveryDate}</div>
+            ${deliveryText}
         </div>
-        <div class="space-y-2">
+        <div class="space-y-1">
             ${itemsHtml}
         </div>
     `;
@@ -145,79 +129,10 @@ function updateOrderSummary() {
     totalSection.classList.remove('hidden');
 }
 
-// === QRIS MODAL (simulasi) ===
-function openQrisModal() {
-    const modal = document.getElementById('qris-modal');
-    if (!modal) return;
-    modal.classList.add('active');
-}
-
-function closeQrisModal() {
-    const modal = document.getElementById('qris-modal');
-    if (!modal) return;
-    modal.classList.remove('active');
-}
-
-function simulateQrisPaid() {
-    closeQrisModal();
-    showAlert('success', '✅ Simulasi: pembayaran QRIS berhasil. Nanti diganti callback gateway.');
-}
-
-// === SUBMIT CHECKOUT ===
-function handleCheckoutSubmit() {
-    if (!currentProduct) return;
-
-    const deliveryDate  = document.getElementById('delivery-date').value;
-    const quantities    = getVariantQuantities();
-    const name          = document.getElementById('customer-name').value.trim();
-    const whatsapp      = document.getElementById('customer-whatsapp').value.trim();
-    const address       = document.getElementById('customer-address').value.trim();
-    const paymentMethod = document.getElementById('payment-method').value;
-
-    // VALIDASI KOSONG
-    if (!deliveryDate || !name || !whatsapp || !address || !quantities.some(q => q > 0)) {
-        showValidationError(currentProduct.name);
-        return;
-    }
-
-    let total = 0;
-    let itemLines = '';
-
-    quantities.forEach((qty, i) => {
-        if (qty <= 0) return;
-        const pkg = currentProduct.packages[i];
-        const sub = pkg.price * qty;
-        total += sub;
-        itemLines += `- ${pkg.label}: ${qty} pack x ${formatRupiah(pkg.price)} = ${formatRupiah(sub)}\n`;
-    });
-
-    const header =
-        `Halo kak, saya ingin pre-order:\n\n` +
-        `*Produk*: ${currentProduct.name}\n` +
-        `*Detail Paket:*\n${itemLines}\n` +
-        `*Tanggal Pengiriman*: ${deliveryDate}\n` +
-        `*Total*: ${formatRupiah(total)}\n\n` +
-        `*Nama*: ${name}\n` +
-        `*WhatsApp*: ${whatsapp}\n` +
-        `*Alamat*: ${address}\n\n` +
-        `Metode bayar: ${paymentMethod === 'cod' ? 'COD / Cash' : 'QRIS (simulasi)'} .`;
-
-    if (paymentMethod === 'cod') {
-        const waNumber = '6281234567890'; // TODO: ganti dengan nomor kamu
-        const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(header)}`;
-        window.open(waUrl, '_blank', 'noopener,noreferrer');
-        showAlert('success', '✅ Pesanan COD Anda telah dikirim ke WhatsApp.');
-    } else {
-        window.__lastOrderForQris = {
-            text: header,
-            total,
-        };
-        openQrisModal();
-    }
-}
-
 // === INIT FLATPICKR + PRODUCT ===
 function initFlatpickr() {
+    if (typeof flatpickr === 'undefined') return;
+
     const today = new Date();
 
     const minDate = new Date();
@@ -245,7 +160,30 @@ function initProduct() {
         currentProduct = JSON.parse(el.value);
     } catch (e) {
         console.error('Gagal parse product-data', e);
+        currentProduct = null;
     }
+}
+
+// === VALIDASI SEBELUM SUBMIT (tanpa ganggu proses backend) ===
+function handleCheckoutSubmit(event) {
+    if (!currentProduct) return;
+
+    const deliveryDate  = document.getElementById('delivery-date')?.value?.trim();
+    const quantities    = getVariantQuantities();
+    const name          = document.getElementById('customer-name')?.value?.trim();
+    const whatsapp      = document.getElementById('customer-whatsapp')?.value?.trim();
+    const address       = document.getElementById('customer-address')?.value?.trim();
+    const paymentMethod = document.getElementById('payment-method')?.value;
+
+    const hasQuantity = quantities.some(q => q > 0);
+
+    if (!deliveryDate || !name || !whatsapp || !address || !paymentMethod || !hasQuantity) {
+        event.preventDefault();
+        showValidationError(currentProduct.name || 'produk');
+        return;
+    }
+
+    // kalau semua OK, biarkan form tetap submit ke backend
 }
 
 // DOM READY
@@ -256,4 +194,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initProduct();
     initFlatpickr();
     updateOrderSummary();
+
+    const form = document.getElementById('checkout-form');
+    if (form) {
+        form.addEventListener('submit', handleCheckoutSubmit);
+    }
 });

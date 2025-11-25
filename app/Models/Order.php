@@ -18,7 +18,6 @@ class Order extends Model
         'customer_address',
         'city',
         'area',
-        'payment_method',
 
         'delivery_date',
         'delivery_time_slot',
