@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Data Orders</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/logos/logo.png">
+
 
     {{-- Font Onest --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -7,6 +7,7 @@
 
     {{-- Favicon (sesuaikan kalau beda) --}}
     <link rel="icon" type="image/png" sizes="32x32" href="/images/logos/logo.png">
+    
 
     {{-- Font Onest --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

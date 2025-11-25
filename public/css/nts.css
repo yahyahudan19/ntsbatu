@@ -564,3 +564,32 @@ select:focus {
     padding: 1.5rem;
     box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
 }
+
+/* ===================================================================
+   FORM INPUT UNIFIED FONT (Onest)
+   =================================================================== */
+
+input,
+textarea,
+select {
+    font-family: 'Onest', sans-serif !important;
+    font-size: 0.95rem;
+    color: #111827;
+}
+
+/* Placeholder styling */
+input::placeholder,
+textarea::placeholder {
+    font-family: 'Onest', sans-serif !important;
+    color: #9ca3af; /* abu-abu lembut */
+    opacity: 1;     /* pastikan terlihat */
+}
+
+/* Placeholder untuk cross-browser */
+input::-webkit-input-placeholder { font-family: 'Onest', sans-serif !important; }
+input:-ms-input-placeholder      { font-family: 'Onest', sans-serif !important; }
+input::-ms-input-placeholder     { font-family: 'Onest', sans-serif !important; }
+
+textarea::-webkit-input-placeholder { font-family: 'Onest', sans-serif !important; }
+textarea:-ms-input-placeholder      { font-family: 'Onest', sans-serif !important; }
+textarea::-ms-input-placeholder     { font-family: 'Onest', sans-serif !important; }

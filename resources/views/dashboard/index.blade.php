@@ -4,9 +4,16 @@
     <meta charset="UTF-8">
     <title>Dashboard Pemesanan</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/logos/logo.png">
+
 
     {{-- CSS khusus dashboard --}}
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+
+    {{-- Font Onest --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     {{-- JS khusus dashboard --}}
     <script src="{{ asset('js/dashboard.js') }}" defer></script>

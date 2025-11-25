@@ -22,16 +22,18 @@ class Order extends Model
         'delivery_date',
         'delivery_time_slot',
         'notes',
-
+        
         'subtotal',
         'delivery_fee',
         'discount_amount',
         'grand_total',
 
         'status',
+        'paid_at',
     ];
 
     protected $casts = [
+        'paid_at'   => 'datetime',
         'delivery_date'   => 'date',
         'subtotal'        => 'integer',
         'delivery_fee'    => 'integer',
