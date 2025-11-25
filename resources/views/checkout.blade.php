@@ -98,7 +98,7 @@
                         </div>
 
                         {{-- Paket/varian --}}
-                        <div>
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Pilih Paket & Jumlah
                                 <span class="text-red-500">*</span>
@@ -106,44 +106,44 @@
 
                             <div class="space-y-3" id="package-list">
                                 @foreach($product['packages'] as $i => $pkg)
-                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                        <div class="space-y-1">
-                                            <div class="font-medium text-gray-900">
-                                                {{ $pkg['label'] }}
-                                            </div>
-                                            @if (!empty($pkg['description']))
-                                                <div class="text-xs text-gray-500">
-                                                    {{ $pkg['description'] }}
-                                                </div>
-                                            @endif
-                                            <div class="text-sm font-semibold text-green-700">
-                                                Rp {{ number_format($pkg['price'], 0, ',', '.') }}
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <div class="font-medium text-gray-900">{{ $pkg['label'] }}</div>
+                                            <div class="text-sm text-gray-600">
+                                                Rp {{ number_format($pkg['price'], 0, ',', '.') }} / pack
                                             </div>
                                         </div>
 
                                         <div class="flex items-center gap-2">
+                                            {{-- ID varian untuk backend (WAJIB) --}}
+                                            <input
+                                                type="hidden"
+                                                name="variants[{{ $i }}][variant_id]"
+                                                value="{{ $pkg['id'] }}"
+                                            >
+
                                             <button
                                                 type="button"
-                                                class="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 text-lg leading-none hover:bg-gray-100"
+                                                class="px-2 py-1 border rounded-lg text-sm"
                                                 onclick="changeVariantQty({{ $i }}, -1)"
                                             >
-                                                −
+                                                -
                                             </button>
 
                                             <input
                                                 type="number"
                                                 id="variant-qty-{{ $i }}"
                                                 name="variants[{{ $i }}][qty]"
-                                                value="{{ old('variants.'.$i.'.qty', 0) }}"
+                                                class="w-12 text-center border rounded-lg py-1 text-sm"
+                                                value="{{ old("variants.$i.qty", 0) }}"
                                                 min="0"
-                                                class="w-14 text-center border rounded-lg px-2 py-1 text-sm text-gray-900
-                                                       focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
+                                                max="99"
                                                 oninput="onVariantQtyInput({{ $i }})"
                                             >
 
                                             <button
                                                 type="button"
-                                                class="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 text-lg leading-none hover:bg-gray-100"
+                                                class="px-2 py-1 border rounded-lg text-sm"
                                                 onclick="changeVariantQty({{ $i }}, 1)"
                                             >
                                                 +
@@ -154,9 +154,10 @@
                             </div>
 
                             <p class="text-xs text-gray-500 mt-2">
-                                Minimal salah satu paket diisi &ge; 1 pack untuk melanjutkan.
+                                Kamu bisa mengkombinasikan beberapa paket sekaligus. Biarkan 0 jika tidak ingin paket tersebut.
                             </p>
                         </div>
+
 
                         {{-- Data pemesan --}}
                         <div class="grid md:grid-cols-2 gap-4">

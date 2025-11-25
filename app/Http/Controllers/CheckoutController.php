@@ -51,8 +51,10 @@ class CheckoutController extends Controller
             'customer_whatsapp' => ['required', 'string', 'max:50'],
             'customer_address'  => ['required', 'string', 'max:500'],
             'payment_method'    => ['required', 'in:cod,qris'],
-            'variants'          => ['required', 'array'],
-            'variants.*.variant_id' => ['nullable', 'exists:product_variants,id'],
+
+            'variants'              => ['required', 'array'],
+            // variant_id sekarang WAJIB dan harus ada di product_variants
+            'variants.*.variant_id' => ['required', 'integer', 'exists:product_variants,id'],
             'variants.*.qty'        => ['nullable', 'integer', 'min:0'],
         ]);
 
@@ -63,17 +65,27 @@ class CheckoutController extends Controller
 
         // Pastikan product_id di form sama dengan slug
         if ((int) $validated['product_id'] !== $product->id) {
-            return back()->withErrors(['product_id' => 'Produk tidak valid.'])->withInput();
+            return back()
+                ->withErrors(['product_id' => 'Produk tidak valid.'])
+                ->withInput();
         }
 
-        // 3. Filter varian yang qty > 0
-        $selectedVariants = collect($validated['variants'])
+        // 3. Rapikan & filter varian yang qty > 0
+        $selectedVariants = collect($validated['variants'] ?? [])
+            ->map(function ($row) {
+                return [
+                    'variant_id' => (int)($row['variant_id'] ?? 0),
+                    'qty'        => (int)($row['qty'] ?? 0),
+                ];
+            })
             ->filter(function ($row) {
-                return !empty($row['variant_id']) && ($row['qty'] ?? 0) > 0;
+                return $row['variant_id'] > 0 && $row['qty'] > 0;
             });
 
         if ($selectedVariants->isEmpty()) {
-            return back()->withErrors(['variants' => 'Minimal pilih satu paket dengan jumlah > 0.'])->withInput();
+            return back()
+                ->withErrors(['variants' => 'Minimal pilih satu paket dengan jumlah > 0.'])
+                ->withInput();
         }
 
         // 4. Ambil data varian dari DB
@@ -84,21 +96,30 @@ class CheckoutController extends Controller
             ->get()
             ->keyBy('id');
 
+        // Pastikan semua varian ditemukan
+        if ($variants->count() !== count($variantIds)) {
+            return back()
+                ->withErrors(['variants' => 'Sebagian paket tidak valid.'])
+                ->withInput();
+        }
+
         // Pastikan semua varian milik produk yang sama
         foreach ($variants as $variant) {
             if ($variant->product_id !== $product->id) {
-                return back()->withErrors(['variants' => 'Paket tidak sesuai dengan produk.'])->withInput();
+                return back()
+                    ->withErrors(['variants' => 'Paket tidak sesuai dengan produk.'])
+                    ->withInput();
             }
         }
 
         // 5. Hitung subtotal & siapkan item
-        $subtotal = 0;
+        $subtotal  = 0;
         $itemsData = [];
 
         foreach ($selectedVariants as $row) {
             $variant = $variants[$row['variant_id']];
-            $qty     = (int) $row['qty'];
-            $price   = (int) $variant->price;
+            $qty     = (int)$row['qty'];
+            $price   = (int)$variant->price;
             $sub     = $price * $qty;
 
             $subtotal += $sub;
@@ -115,7 +136,9 @@ class CheckoutController extends Controller
         }
 
         if ($subtotal <= 0) {
-            return back()->withErrors(['variants' => 'Subtotal tidak valid.'])->withInput();
+            return back()
+                ->withErrors(['variants' => 'Subtotal tidak valid.'])
+                ->withInput();
         }
 
         // Ongkir & diskon (sementara 0)
@@ -130,14 +153,14 @@ class CheckoutController extends Controller
 
         // 7. Simpan ORDER
         $order = Order::create([
-            'user_id'          => null, // nanti bisa isi Auth::id() kalau ada login
-            'order_code'       => $orderCode,
-            'customer_name'    => $validated['customer_name'],
-            'customer_phone'   => $validated['customer_whatsapp'],
-            'customer_address' => $validated['customer_address'],
-            'city'             => 'Kota Batu',
-            'area'             => null,
-            'delivery_date'    => $validated['delivery_date'],
+            'user_id'            => null, // nanti bisa isi Auth::id() kalau ada login
+            'order_code'         => $orderCode,
+            'customer_name'      => $validated['customer_name'],
+            'customer_phone'     => $validated['customer_whatsapp'],
+            'customer_address'   => $validated['customer_address'],
+            'city'               => 'Kota Batu',
+            'area'               => null,
+            'delivery_date'      => $validated['delivery_date'],
             'delivery_time_slot' => null,
             'notes'              => null,
 
@@ -146,12 +169,12 @@ class CheckoutController extends Controller
             'discount_amount' => $discount,
             'grand_total'     => $grandTotal,
 
-            'status'          => $paymentMethod === 'cod'
-                                    ? 'processing'
-                                    : 'pending_payment',
+            'status' => $paymentMethod === 'cod'
+                ? 'processing'
+                : 'pending_payment',
 
-            // kalau di tabel orders sudah kamu tambah kolom payment_method:
-            // 'payment_method'   => $paymentMethod,
+            // kalau kolom ini sudah ada:
+            // 'payment_method' => $paymentMethod,
         ]);
 
         // 8. Simpan ORDER ITEMS
@@ -163,43 +186,34 @@ class CheckoutController extends Controller
 
         // 9. Branching flow: COD vs QRIS/Payment Gateway
         if ($paymentMethod === 'cod') {
-            // FLOW COD:
-            // - Tidak buat record pembayaran dulu
-            // - Tidak redirect ke Duitku
-            // - Bisa kirim WA / email ke admin di sini (nanti)
-
             return redirect()
                 ->route('checkout.show', $slug)
                 ->with('success', 'Pesanan COD kamu sudah tercatat. Kami akan menghubungi via WhatsApp untuk konfirmasi.');
-        } else {
-            // FLOW QRIS (Duitku)
-            try {
-                /** @var \App\Services\DuitkuService $duitku */
-                $duitku  = app(DuitkuService::class);
-                $payment = $duitku->createPopInvoice($order);
-
-                // Kalau ada payment_url dari Duitku, langsung redirect
-                if ($payment->payment_url) {
-                    return redirect()->away($payment->payment_url);
-                }
-
-                // Fallback kalau tidak ada payment_url (misal pakai JS pop nanti)
-                return redirect()
-                    ->route('checkout.show', $slug)
-                    ->with('success', 'Tagihan berhasil dibuat. Silakan lanjutkan pembayaran melalui halaman Duitku.');
-            } catch (\Throwable $e) {
-                \Log::error('Duitku create invoice error: '.$e->getMessage());
-
-                // Rollback status order kalau mau
-                $order->status = 'failed';
-                $order->save();
-
-                return redirect()
-                    ->route('checkout.show', $slug)
-                    ->withErrors(['payment' => 'Gagal membuat tagihan pembayaran. Silakan coba lagi atau pilih COD.']);
-            }
         }
 
+        // FLOW QRIS (Duitku)
+        try {
+            /** @var \App\Services\DuitkuService $duitku */
+            $duitku  = app(DuitkuService::class);
+            $payment = $duitku->createPopInvoice($order);
+
+            if ($payment->payment_url) {
+                return redirect()->away($payment->payment_url);
+            }
+
+            return redirect()
+                ->route('checkout.show', $slug)
+                ->with('success', 'Tagihan berhasil dibuat. Silakan lanjutkan pembayaran melalui halaman Duitku.');
+        } catch (\Throwable $e) {
+            \Log::error('Duitku create invoice error: ' . $e->getMessage());
+
+            $order->status = 'failed';
+            $order->save();
+
+            return redirect()
+                ->route('checkout.show', $slug)
+                ->withErrors(['payment' => 'Gagal membuat tagihan pembayaran. Silakan coba lagi atau pilih COD.']);
+        }
     }
 
 }
