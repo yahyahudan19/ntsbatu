@@ -63,4 +63,21 @@ class Order extends Model
     {
         return $this->items->sum('quantity');
     }
+
+    public function getPaymentMethodLabelAttribute(): string
+    {
+        // Kalau tidak ada payment, anggap COD
+        if (!$this->payment) {
+            return 'COD';
+        }
+
+        $code = $this->payment->payment_method;
+
+        // Mapping kode → label
+        return match ($code) {
+            'GQ'    => 'QRIS',
+            // nanti kalau ada metode lain tinggal tambahin di sini
+            default => strtoupper($code ?? 'COD'),
+        };
+    }
 }

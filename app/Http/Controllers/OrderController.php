@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-     public function index(Request $request)
+    public function index(Request $request)
     {
-        $query = Order::with('items', 'user');
+        $query = Order::with('items', 'user', 'payment'); // ← tambah 'payment'
 
         // Filter status
         if ($request->filled('status') && $request->status !== 'all') {
@@ -36,13 +36,27 @@ class OrderController extends Controller
 
         // List status untuk dropdown
         $statusOptions = [
-            'all'      => 'Semua Status',
-            'pending'  => 'Pending',
-            'paid'     => 'Terbayar',
-            'cancelled'=> 'Dibatalkan',
-            'failed'   => 'Gagal',
+            'all'       => 'Semua Status',
+            'pending'   => 'Pending',
+            'paid'      => 'Terbayar',
+            'cancelled' => 'Dibatalkan',
+            'failed'    => 'Gagal',
         ];
 
         return view('orders.index', compact('orders', 'statusOptions'));
     }
+
+    public function updateStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:draft,pending_payment,paid,processing,shipped,completed,cancelled'
+        ]);
+
+        $order->update([
+            'status' => $request->status
+        ]);
+
+        return back()->with('success', 'Status order berhasil diperbarui.');
+    }
+
 }

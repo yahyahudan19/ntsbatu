@@ -29,8 +29,6 @@ Route::get('/checkout/{slug}', [CheckoutController::class, 'show'])->name('check
 Route::post('/checkout/{slug}', [CheckoutController::class, 'store'])->name('checkout.store');
 
 
-Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
 
 Route::post('/payment/duitku/callback', [DuitkuCallbackController::class, 'callback'])
@@ -47,6 +45,12 @@ Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+
+    Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
 
     Route::get('settings/profile', Profile::class)->name('profile.edit');
     Route::get('settings/password', Password::class)->name('user-password.edit');

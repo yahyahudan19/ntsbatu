@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard Pemesanan</title>
+    <title>Dashboard - NTS Batu</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/logos/logo.png">
 
@@ -18,7 +18,7 @@
     {{-- JS khusus dashboard --}}
     <script src="{{ asset('js/dashboard.js') }}" defer></script>
 </head>
-<body class="dashboard-body">
+<body class="dashboard-body dashboard-body--orders">
 
     {{-- Navbar --}}
     <nav class="navbar">
@@ -49,7 +49,7 @@
         </div>
     </nav>
 
-    <main class="main-container">
+    <main class="main-container main-container-orders">
         <header class="page-header">
             <div>
                 <h1 class="page-title">Dashboard</h1>
