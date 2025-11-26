@@ -210,10 +210,10 @@
                                 name="customer_address"
                                 rows="3"
                                 class="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400
-                                       focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
-                                placeholder="Tulis alamat lengkap, patokan, dan nama penerima"
-                                required
-                            >{{ old('customer_address') }}</textarea>
+                                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                    bg-gray-100 cursor-not-allowed"
+                                disabled
+                            >{{ old('customer_address', 'RSUD Karsa Husada Batu') }}</textarea>
                         </div>
 
                         {{-- Metode Pembayaran --}}

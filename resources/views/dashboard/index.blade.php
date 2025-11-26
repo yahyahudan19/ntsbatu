@@ -30,13 +30,9 @@
 
         <div class="navbar-right" id="navbarMenu">
 
-            <a href="{{ route('dashboard') }}" class="navbar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                Dashboard
-            </a>
-
-            <a href="{{ route('orders.index') }}" class="navbar-link {{ request()->routeIs('orders.index') ? 'active' : '' }}">
-                Data Order
-            </a>
+            <a href="{{ route('dashboard') }}" class="navbar-link active">Dashboard</a>
+            <a href="{{ route('products.index') }}" class="navbar-link">Data Produk</a>
+            <a href="{{ route('orders.index') }}" class="navbar-link">Data Order</a>
 
             {{-- Logout --}}
             <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
@@ -79,6 +75,40 @@
                 <div class="stat-footer">Sudah dibayar / sukses</div>
             </div>
         </section>
+
+        {{-- Cards Statistik Keuntungan --}}
+        <section class="stats-grid" style="margin-top: 6px;">
+            <div class="stat-card stat-earn-today">
+                <div class="stat-label">Keuntungan Hari Ini</div>
+                <div class="stat-value">
+                    Rp {{ number_format($revenue['today'] ?? 0, 0, ',', '.') }}
+                </div>
+                <div class="stat-footer">
+                    Total pembayaran dengan status <strong>paid</strong> hari ini
+                </div>
+            </div>
+
+            <div class="stat-card stat-earn-month">
+                <div class="stat-label">Keuntungan Bulan Ini</div>
+                <div class="stat-value">
+                    Rp {{ number_format($revenue['month'] ?? 0, 0, ',', '.') }}
+                </div>
+                <div class="stat-footer">
+                    Akumulasi order terbayar di bulan berjalan
+                </div>
+            </div>
+
+            <div class="stat-card stat-earn-total">
+                <div class="stat-label">Total Keuntungan</div>
+                <div class="stat-value">
+                    Rp {{ number_format($revenue['total'] ?? 0, 0, ',', '.') }}
+                </div>
+                <div class="stat-footer">
+                    Semua order dengan status paid/success/settlement
+                </div>
+            </div>
+        </section>
+
 
         {{-- Tabel ringkas order terbaru --}}
         <section class="section-card">

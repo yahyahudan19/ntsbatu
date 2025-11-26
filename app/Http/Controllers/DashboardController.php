@@ -11,15 +11,11 @@ class DashboardController extends Controller
     {
         $stats = [
             'total'   => Order::count(),
-
-            // Pending / belum bayar (coba cover beberapa kemungkinan nilai)
             'pending' => Order::whereIn('status', [
                 'pending',
                 'unpaid',
                 'waiting_payment',
             ])->count(),
-
-            // Terbayar / sukses
             'paid'    => Order::whereIn('status', [
                 'paid',
                 'success',
@@ -27,12 +23,29 @@ class DashboardController extends Controller
             ])->count(),
         ];
 
-        // Ambil 5 pesanan terbaru + relasi items (buat total quantity)
         $latestOrders = Order::with('items')
-        ->orderByDesc('created_at')
-        ->limit(5)
-        ->get();
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
 
-        return view('dashboard.index', compact('stats', 'latestOrders'));
+        // ️⬇️ Tambahan di sini
+        $paidStatuses = ['paid', 'success', 'settlement'];
+        $today        = now(); // pakai timezone app
+
+        $revenue = [
+            'total' => Order::whereIn('status', $paidStatuses)
+                ->sum('grand_total'),
+
+            'today' => Order::whereIn('status', $paidStatuses)
+                ->whereDate('created_at', $today->toDateString())
+                ->sum('grand_total'),
+
+            'month' => Order::whereIn('status', $paidStatuses)
+                ->whereYear('created_at', $today->year)
+                ->whereMonth('created_at', $today->month)
+                ->sum('grand_total'),
+        ];
+
+        return view('dashboard.index', compact('stats', 'latestOrders', 'revenue'));
     }
 }

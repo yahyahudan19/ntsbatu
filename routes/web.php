@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DuitkuCallbackController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -28,9 +29,6 @@ Route::get('/checkout/{product}', [CheckoutController::class, 'show'])->name('ch
 Route::get('/checkout/{slug}', [CheckoutController::class, 'show'])->name('checkout.show');
 Route::post('/checkout/{slug}', [CheckoutController::class, 'store'])->name('checkout.store');
 
-
-
-
 Route::post('/payment/duitku/callback', [DuitkuCallbackController::class, 'callback'])
     ->withoutMiddleware([VerifyCsrfToken::class])
     ->name('payment.duitku.callback');
@@ -48,8 +46,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/print', [OrderController::class, 'print'])->name('orders.print');
 
     Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+
+    Route::get('/admin/products', [ProductController::class, 'index'])->name('products.index');
+    Route::put('/admin/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::put('/products/{product}/prices', [ProductController::class, 'updatePrices'])->name('products.updatePrices');
 
 
     Route::get('settings/profile', Profile::class)->name('profile.edit');

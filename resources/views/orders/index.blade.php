@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/logos/logo.png">
 
-
     {{-- Font Onest --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -102,7 +101,6 @@
         }
     </style>
 
-
 </head>
 
 <body class="dashboard-body dashboard-body--orders">
@@ -117,7 +115,16 @@
         </button>
         <div class="navbar-right" id="navbarMenu">
             <a href="{{ route('dashboard') }}" class="navbar-link">Dashboard</a>
+            <a href="{{ route('products.index') }}" class="navbar-link">Data Produk</a>
             <a href="{{ route('orders.index') }}" class="navbar-link active">Data Order</a>
+
+            {{-- Logout --}}
+            <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+                @csrf
+                <button type="submit" class="navbar-link navbar-logout">
+                    Logout
+                </button>
+            </form>
         </div>
     </nav>
 
@@ -279,13 +286,7 @@
                     </tbody>
                 </table>
             </div>
-
-            {{-- Pagination --}}
-            {{-- @if($orders->hasPages())
-                <div style="margin-top: 14px;">
-                    {{ $orders->links() }}
-                </div>
-            @endif --}}
+           
         </section>
     </main>
 

@@ -59,4 +59,26 @@ class OrderController extends Controller
         return back()->with('success', 'Status order berhasil diperbarui.');
     }
 
+    public function show(Order $order)
+    {
+        // eager load relasi yang dibutuhkan
+        $order->load([
+            'items.product',
+            'payment',
+        ]);
+
+        return view('admin.orders.show', compact('order'));
+    }
+
+    public function print(Order $order)
+    {
+        $order->load([
+            'items.product',
+            'payment',
+        ]);
+
+        // view khusus print (tanpa navbar dashboard)
+        return view('admin.orders.print', compact('order'));
+    }
+
 }
