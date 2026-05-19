@@ -28,11 +28,47 @@
     --color-accent-foreground: var(--color-white);
 }
 
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    section {
+        scroll-margin-top: 100px;
+    }
+}
+
+
 @layer theme {
     .dark {
         --color-accent: var(--color-white);
         --color-accent-content: var(--color-white);
         --color-accent-foreground: var(--color-neutral-800);
+    }
+}
+
+@theme {
+    --font-display: 'Instrument Sans', sans-serif;
+    --font-serif: 'DM Serif Display', serif;
+    
+    /* Fresh & Organic Palette */
+    --color-brand-red: #E63946;  /* Strawberry Red */
+    --color-brand-dark-red: #D62828; 
+    --color-brand-green: #2A9D8F; /* Fresh Leaves */
+    --color-brand-yellow: #F4A261; /* Sun/Citrus */
+    --color-brand-gold: #E9C46A;
+
+    --animate-fade-in-up: fadeInUp 0.8s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -64,3 +100,239 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* ===================================================================
+   MODAL STYLES (Migrated from nts.css)
+   =================================================================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90%;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.qris-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.qris-code {
+    width: 280px;
+    height: 280px;
+    margin: 20px auto;
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner {
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #495057;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.payment-status {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    margin: 16px 0;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-success { background: #d4edda; color: #155724; }
+.status-failed { background: #f8d7da; color: #721c24; }
+
+/* Sweet Modal (Custom Alert) */
+.sweet-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+.sweet-modal.active {
+    display: flex;
+}
+
+.sweet-modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 450px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease;
+    position: relative;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sweet-modal-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    animation: bounceIn 0.5s ease;
+}
+
+.sweet-modal-icon.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.sweet-modal-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 16px;
+    font-family: var(--font-display);
+}
+
+.sweet-modal-text {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.sweet-modal-button {
+    background: #495057;
+    color: white;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sweet-modal-button:hover {
+    background: #343a40;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ===================================================================
+   MOBILE MENU STYLES (Migrated from nts.css)
+   =================================================================== */
+
+.mobile-menu-button {
+    display: none;
+    cursor: pointer;
+    z-index: 60;
+}
+
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 28px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.hamburger span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background: #374151;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+@media (max-width: 768px) {
+    .desktop-nav {
+        display: none !important;
+    }
+
+    .mobile-menu-button {
+        display: block;
+    }
+}

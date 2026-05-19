@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        'url' => env('WHATSAPP_GATEWAY_URL'),
+        'session_id' => env('WHATSAPP_SESSION_ID'),
+        'username' => env('WHATSAPP_USERNAME'),
+        'password' => env('WHATSAPP_PASSWORD'),
+    ],
+
 ];

@@ -81,4 +81,15 @@ class OrderController extends Controller
         return view('admin.orders.print', compact('order'));
     }
 
+    public function sendWhatsApp(Order $order, \App\Services\WhatsAppService $whatsappService)
+    {
+        // Use the centralized method in service
+        $result = $whatsappService->sendOrderNotification($order);
+
+        if ($result['success'] ?? false) {
+            return back()->with('success', 'Invoice berhasil dikirim ke WhatsApp pelanggan.');
+        } else {
+            return back()->with('error', 'Gagal mengirim WhatsApp: ' . ($result['error'] ?? 'Unknown error'));
+        }
+    }
 }

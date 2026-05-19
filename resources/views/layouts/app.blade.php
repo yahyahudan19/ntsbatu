@@ -6,22 +6,13 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/images/logos/logo.png">
     <title>@yield('title', 'NTS Batu - Fresh Strawberry & Berry')</title>
 
-    {{-- Font Onest --}}
+    {{-- Google Fonts: Instrument Sans & DM Serif Display --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 
-    {{-- Tailwind CDN (boleh diganti Vite nanti) --}}
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    {{-- CSS custom --}}
-    <link rel="stylesheet" href="{{ asset('css/nts.css') }}">
-
-    <style>
-        html, body {
-            font-family: "Onest", system-ui, sans-serif !important;
-        }
-    </style>
+    {{-- Vite Assets --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen">
 

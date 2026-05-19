@@ -13,7 +13,7 @@ function showValidationError(productName) {
         icon: 'error',
         title: 'Wah Maaf',
         text: `Lengkapi data di bawah untuk menyelesaikan pre-order ${productName}`,
-        confirmButtonColor: '#16a34a',
+        confirmButtonColor: '#DC2626',
         confirmButtonText: 'Mengerti',
         width: 380,
     });
@@ -83,7 +83,7 @@ function updateOrderSummary() {
     // Kalau belum pilih tanggal atau belum ada qty
     if (!deliveryDate || !quantities.some(q => q > 0)) {
         summaryDiv.innerHTML =
-            '<p class="text-gray-500 text-sm">Pilih tanggal dan isi jumlah minimal 1 pada salah satu paket.</p>';
+            '<p class="text-zinc-400 text-sm">Pilih tanggal dan isi jumlah minimal 1 pada salah satu paket.</p>';
         totalSection.classList.add('hidden');
         return;
     }
@@ -100,10 +100,10 @@ function updateOrderSummary() {
         itemsHtml += `
             <div class="flex justify-between text-sm mb-2">
                 <div>
-                    <div class="font-medium text-gray-900">${pkg.label}</div>
-                    <div class="text-xs text-gray-600">${qty} pack x ${formatRupiah(pkg.price)}</div>
+                    <div class="font-medium text-zinc-900">${pkg.label}</div>
+                    <div class="text-xs text-zinc-500">${qty} pack x ${formatRupiah(pkg.price)}</div>
                 </div>
-                <div class="font-semibold text-gray-900">
+                <div class="font-semibold text-zinc-900">
                     ${formatRupiah(sub)}
                 </div>
             </div>
@@ -111,12 +111,12 @@ function updateOrderSummary() {
     });
 
     const deliveryText = deliveryDate
-        ? `<div class="text-xs text-gray-500 mt-1">Tanggal pengiriman: <span class="font-medium text-gray-800">${deliveryDate}</span></div>`
+        ? `<div class="text-xs text-zinc-500 mt-1">Tanggal pengiriman: <span class="font-medium text-zinc-800">${deliveryDate}</span></div>`
         : '';
 
     summaryDiv.innerHTML = `
         <div class="mb-3">
-            <div class="font-semibold text-gray-900">${currentProduct.name}</div>
+            <div class="font-semibold text-zinc-900">${currentProduct.name}</div>
             ${deliveryText}
         </div>
         <div class="space-y-1">

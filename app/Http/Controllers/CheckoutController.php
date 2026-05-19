@@ -184,6 +184,16 @@ class CheckoutController extends Controller
             ]));
         }
 
+        // --- Kirim Notifikasi WhatsApp ---
+        try {
+            /** @var \App\Services\WhatsAppService $waService */
+            $waService = app(\App\Services\WhatsAppService::class);
+            $waService->sendOrderNotification($order);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send WA notification on checkout: ' . $e->getMessage());
+            // Don't fail the checkout process just because WA failed
+        }
+
         // 9. Branching flow: COD vs QRIS/Payment Gateway
         if ($paymentMethod === 'cod') {
             return redirect()
@@ -215,5 +225,4 @@ class CheckoutController extends Controller
                 ->withErrors(['payment' => 'Gagal membuat tagihan pembayaran. Silakan coba lagi atau pilih COD.']);
         }
     }
-
 }

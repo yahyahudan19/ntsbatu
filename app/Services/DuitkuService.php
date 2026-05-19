@@ -64,24 +64,21 @@ class DuitkuService
             'shippingAddress' => $address,
         ];
 
-        // Item detail ambil dari order_items (snapshot)
-        $itemDetails = [];
-        foreach ($order->items as $item) {
-            $itemDetails[] = [
-                'name'     => $item->variant_name ?? $item->product_name,
-                'price'    => (int) $item->unit_price,
-                'quantity' => (int) $item->quantity,
-            ];
-        }
-
-        // Kalau mau simple, bisa satu item "Total Pre-Order"
-        if (empty($itemDetails)) {
-            $itemDetails[] = [
+        // Item detail — gunakan single item agar total PASTI sama dengan paymentAmount
+        // (sesuai contoh di SDK docs: price = paymentAmount, quantity = 1)
+        $itemDetails = [
+            [
                 'name'     => 'Pre-order ' . $order->order_code,
                 'price'    => $paymentAmount,
                 'quantity' => 1,
-            ];
-        }
+            ],
+        ];
+
+        \Log::info('Duitku createInvoice debug', [
+            'paymentAmount' => $paymentAmount,
+            'itemDetails'   => $itemDetails,
+            'order_code'    => $order->order_code,
+        ]);
 
         $productDetails   = 'Pre-order buah - ' . $order->order_code;
         $additionalParam  = '';
@@ -96,7 +93,7 @@ class DuitkuService
             'merchantOrderId' => $merchantOrderId,
             'productDetails'  => $productDetails,
             'additionalParam' => $additionalParam,
-            'merchantUserInfo'=> $merchantUserInfo,
+            'merchantUserInfo' => $merchantUserInfo,
             'customerVaName'  => $customerVaName,
             'email'           => $email,
             'phoneNumber'     => $phone,
@@ -121,8 +118,7 @@ class DuitkuService
         // reference, paymentUrl, amount, statusCode, statusMessage :contentReference[oaicite:3]{index=3}
         $payment = Payment::create([
             'order_id'         => $order->id,
-            'provider'         => 'duitku',
-            'merchant_order_id'=> $merchantOrderId,
+            'merchant_order_id' => $merchantOrderId,
             'reference'        => $response->reference ?? null,
             'payment_url'      => $response->paymentUrl ?? null,
             'amount'           => $paymentAmount,
@@ -164,7 +160,7 @@ class DuitkuService
         $order = Order::where('order_code', $merchantOrderId)->first();
 
         if (! $order) {
-            throw new \RuntimeException('Order not found for merchantOrderId '.$merchantOrderId);
+            throw new \RuntimeException('Order not found for merchantOrderId ' . $merchantOrderId);
         }
 
         // Cari PAYMENT berdasarkan merchant_order_id (yang sudah kita simpan saat createInvoice)
@@ -213,5 +209,24 @@ class DuitkuService
             'order_status'    => $order->status,
             'payment_status'  => $payment->status,
         ]);
+    }
+
+    /**
+     * Check transaction status via Duitku API
+     * @return object|null decoded JSON response
+     */
+    public function checkTransactionStatus(string $merchantOrderId): ?object
+    {
+        $config = $this->makeConfig();
+
+        $responseJson = Pop::transactionStatus($merchantOrderId, $config);
+        $response     = json_decode($responseJson);
+
+        \Log::info('Duitku transactionStatus response', [
+            'merchantOrderId' => $merchantOrderId,
+            'response'        => $response,
+        ]);
+
+        return $response;
     }
 }

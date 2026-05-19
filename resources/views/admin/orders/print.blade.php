@@ -9,7 +9,7 @@
 
 
     {{-- Boleh pakai CSS yang sama biar rapi --}}
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}?v={{ filemtime(public_path('css/dashboard.css')) }}">
 
     <style>
         body {

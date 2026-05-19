@@ -12,6 +12,7 @@ class Payment extends Model
     protected $fillable = [
         'order_id',
         'user_id',
+        'provider',
 
         'merchant_order_id',
         'amount',
@@ -72,7 +73,4 @@ class Payment extends Model
     {
         return $this->status === 'paid';
     }
-
-    
-
 }
