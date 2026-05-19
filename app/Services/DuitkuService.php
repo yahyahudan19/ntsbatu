@@ -187,9 +187,6 @@ class DuitkuService
             $payment->paid_at = now();
 
             $order->status    = 'paid';
-            if (property_exists($order, 'paid_at')) {
-                $order->paid_at = now();
-            }
         } elseif ($resultCode === '01') {
             // Gagal / dibatalkan
             $payment->status = 'failed';

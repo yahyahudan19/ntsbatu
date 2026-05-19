@@ -105,9 +105,6 @@ class DuitkuCallbackController extends Controller
                 }
 
                 $order->status = 'paid';
-                if (!$order->paid_at) {
-                    $order->paid_at = now();
-                }
 
                 // --- Kirim Notifikasi Sukses Bayar (Only if not already paid) ---
                 if (!$alreadyPaid) {
@@ -186,16 +183,20 @@ class DuitkuCallbackController extends Controller
                         $payment->save();
 
                         if ($order) {
+                            $alreadyPaid = ($order->status === 'paid');
+
                             $order->status = 'paid';
                             $order->save();
 
                             // --- Kirim Notifikasi Sukses Bayar (via Return) ---
-                            try {
-                                /** @var \App\Services\WhatsAppService $waService */
-                                $waService = app(\App\Services\WhatsAppService::class);
-                                $waService->sendOrderNotification($order);
-                            } catch (\Exception $e) {
-                                \Log::error('Failed to send WA notification on return success: ' . $e->getMessage());
+                            if (!$alreadyPaid) {
+                                try {
+                                    /** @var \App\Services\WhatsAppService $waService */
+                                    $waService = app(\App\Services\WhatsAppService::class);
+                                    $waService->sendOrderNotification($order);
+                                } catch (\Exception $e) {
+                                    \Log::error('Failed to send WA notification on return success: ' . $e->getMessage());
+                                }
                             }
                         }
 

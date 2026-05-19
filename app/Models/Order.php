@@ -29,11 +29,9 @@ class Order extends Model
         'grand_total',
 
         'status',
-        'paid_at',
     ];
 
     protected $casts = [
-        'paid_at'   => 'datetime',
         'delivery_date'   => 'date',
         'subtotal'        => 'integer',
         'delivery_fee'    => 'integer',
