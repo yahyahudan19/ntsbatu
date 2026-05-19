@@ -252,15 +252,14 @@
                                 required
                                 style="background-image: url(&quot;data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e&quot;); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.25em 1.25em; padding-right: 2.5rem;"
                             >
-                                <option value="" disabled {{ old('payment_method') ? '' : 'selected' }}>
-                                    Pilih metode pembayaran
-                                </option>
-                                <option value="cod" {{ old('payment_method') === 'cod' ? 'selected' : '' }}>
-                                    COD / Cash saat barang diterima
-                                </option>
-                                <option value="qris" {{ old('payment_method') === 'qris' ? 'selected' : '' }}>
+                                <option value="qris" selected>
                                     QRIS (akan diarahkan ke pembayaran online)
                                 </option>
+                                {{-- 
+                                <option value="cod">
+                                    COD / Cash saat barang diterima
+                                </option>
+                                --}}
                             </select>
                         </div>
 

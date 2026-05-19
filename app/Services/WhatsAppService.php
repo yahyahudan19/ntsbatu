@@ -156,6 +156,130 @@ class WhatsAppService
         return $this->sendMessage($order->customer_phone, $message);
     }
 
+    /**
+     * Send a file/document to a specific phone number.
+     *
+     * @param string $phone The recipient's phone number
+     * @param string $filePath Absolute path to the file
+     * @param string $caption Optional caption text
+     * @return array
+     */
+    public function sendFile(string $phone, string $filePath, string $caption = '')
+    {
+        if (!file_exists($filePath)) {
+            return [
+                'success' => false,
+                'error' => 'File not found: ' . $filePath
+            ];
+        }
+
+        $phone = $this->normalizePhoneNumber($phone);
+        $baseUrl = rtrim($this->baseUrl, '/');
+        $url = $baseUrl . '/send/file';
+
+        try {
+            $headers = [];
+            if ($this->sessionId) {
+                $headers['X-Device-Id'] = (string) $this->sessionId;
+            }
+
+            Log::info("WhatsApp Sending File to: $url", [
+                'phone' => $phone,
+                'filePath' => $filePath,
+                'has_auth' => ($this->username && $this->password),
+                'session_id' => $this->sessionId,
+            ]);
+
+            $http = Http::withHeaders($headers);
+
+            if ($this->username && $this->password) {
+                $http->withBasicAuth($this->username, $this->password);
+            }
+
+            // Using attach to upload file binary via multipart/form-data
+            $response = $http->attach(
+                'file',
+                file_get_contents($filePath),
+                basename($filePath)
+            )->post($url, [
+                'phone' => $phone . '@s.whatsapp.net',
+                'caption' => $caption,
+            ]);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $response->json()
+                ];
+            }
+
+            Log::error('WhatsApp Gateway File Error: ' . $response->body());
+
+            return [
+                'success' => false,
+                'error' => $response->body()
+            ];
+        } catch (\Exception $e) {
+            Log::error('WhatsApp Service File Exception: ' . $e->getMessage());
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Generate PDF invoice and send it to customer via WhatsApp.
+     *
+     * @param \App\Models\Order $order
+     * @return array
+     */
+    public function sendOrderInvoicePdf(\App\Models\Order $order)
+    {
+        if (!$order->customer_phone) {
+            return [
+                'success' => false,
+                'error' => 'No customer phone number'
+            ];
+        }
+
+        $order->loadMissing(['items.product', 'payment']);
+
+        try {
+            // Generate PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.pdf', compact('order'));
+            
+            // Create a temporary file path
+            $fileName = 'Invoice-' . ($order->order_code ?? $order->id) . '.pdf';
+            $tempDir = storage_path('app/temp');
+            if (!file_exists($tempDir)) {
+                mkdir($tempDir, 0755, true);
+            }
+            $filePath = $tempDir . '/' . $fileName;
+
+            // Save PDF
+            $pdf->save($filePath);
+
+            // Send via WhatsApp
+            $caption = "Berikut lampiran Invoice Resmi untuk pesanan *#{$order->order_code}* Anda.";
+            $result = $this->sendFile($order->customer_phone, $filePath, $caption);
+
+            // Clean up
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('Failed to generate/send PDF invoice: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
     protected function normalizePhoneNumber($phone)
     {
         // Remove any non-numeric characters

@@ -184,18 +184,17 @@ class CheckoutController extends Controller
             ]));
         }
 
-        // --- Kirim Notifikasi WhatsApp ---
-        try {
-            /** @var \App\Services\WhatsAppService $waService */
-            $waService = app(\App\Services\WhatsAppService::class);
-            $waService->sendOrderNotification($order);
-        } catch (\Exception $e) {
-            \Log::error('Failed to send WA notification on checkout: ' . $e->getMessage());
-            // Don't fail the checkout process just because WA failed
-        }
-
         // 9. Branching flow: COD vs QRIS/Payment Gateway
         if ($paymentMethod === 'cod') {
+            // --- Kirim Notifikasi WhatsApp ---
+            try {
+                /** @var \App\Services\WhatsAppService $waService */
+                $waService = app(\App\Services\WhatsAppService::class);
+                $waService->sendOrderNotification($order);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send WA notification on checkout COD: ' . $e->getMessage());
+            }
+
             return redirect()
                 ->route('checkout.show', $slug)
                 ->with('success', 'Pesanan COD kamu sudah tercatat. Kami akan menghubungi via WhatsApp untuk konfirmasi.');
@@ -206,6 +205,17 @@ class CheckoutController extends Controller
             /** @var \App\Services\DuitkuService $duitku */
             $duitku  = app(DuitkuService::class);
             $payment = $duitku->createPopInvoice($order);
+
+            // --- Kirim Notifikasi WhatsApp (dengan link pembayaran) ---
+            try {
+                $order->setRelation('payment', $payment);
+
+                /** @var \App\Services\WhatsAppService $waService */
+                $waService = app(\App\Services\WhatsAppService::class);
+                $waService->sendOrderNotification($order);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send WA notification on checkout QRIS: ' . $e->getMessage());
+            }
 
             if ($payment->payment_url) {
                 return redirect()->away($payment->payment_url);
