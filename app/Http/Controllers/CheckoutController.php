@@ -64,7 +64,7 @@ class CheckoutController extends Controller
             ->firstOrFail();
 
         // Pastikan product_id di form sama dengan slug
-        if ((int) $validated['product_id'] !== $product->id) {
+        if ((int) $validated['product_id'] !== (int) $product->id) {
             return back()
                 ->withErrors(['product_id' => 'Produk tidak valid.'])
                 ->withInput();
@@ -105,7 +105,7 @@ class CheckoutController extends Controller
 
         // Pastikan semua varian milik produk yang sama
         foreach ($variants as $variant) {
-            if ($variant->product_id !== $product->id) {
+            if ((int) $variant->product_id !== (int) $product->id) {
                 return back()
                     ->withErrors(['variants' => 'Paket tidak sesuai dengan produk.'])
                     ->withInput();

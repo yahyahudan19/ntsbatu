@@ -17,8 +17,9 @@ class ProductVariant extends Model
     ];
 
     protected $casts = [
-        'price'     => 'integer',
-        'is_active' => 'boolean',
+        'product_id' => 'integer',
+        'price'      => 'integer',
+        'is_active'  => 'boolean',
     ];
 
     public function product()
